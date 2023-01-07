@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  ngrok:
+    image: shkoliar/ngrok
+    env_file:
+      - .env
+    environment:
+      - PARAMS=http localhost:3000 --bind-tls true --authtoken ${NGROK_AUTH_TOKEN} --subdomain ${NGROK_SUBDOMAIN}
+    network_mode: host
