@@ -1,7 +1,7 @@
-import { copyFile, readFile, writeFile } from "fs/promises";
-import { join } from "path";
+const { copyFile, readFile, writeFile } = require("fs/promises");
+const { join } = require("path");
 
-export async function main({ rootDirectory }) {
+async function main({ rootDirectory }) {
   const EXAMPLE_ENV_PATH = join(rootDirectory, ".env.example");
   const ENV_PATH = join(rootDirectory, ".env");
 
@@ -15,3 +15,5 @@ export async function main({ rootDirectory }) {
     ),
   ]);
 }
+
+module.exports = main;
