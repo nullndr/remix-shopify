@@ -16,6 +16,14 @@ npx create-remix@latest --template nullndr/remix-shopify
 - Linting with [ESLint](https://eslint.org)
 - Static Types with [TypeScript](https://typescriptlang.org)
 
+## Docker
+
+The [`docker-compose.yaml`](./docker-compose.yaml) file starts an ngrok container.
+
+For this you need to get an ngrok auth token and set it in your `.env` file (you can use the `.env.example` file as example).
+
+The `NGROK_SUBDOMAIN` is your subdomain for the `ngrok.io` domain, for example if you set `NGROK_SUBDOMAIN=myfoobar` your app will be accessible at `myfoobar.ngrok.io`.
+
 ## Development
 
 1. Replace the `scopes` value in [`app/routes/shopify/index`](./app/routes/shopify/index.ts) with the permissions your app needs.
