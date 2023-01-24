@@ -177,6 +177,12 @@ const isHMACValid = (request: Request, secret: string): boolean => {
    * we need to separate the 'hmac' parameter from the others
    */
   url.searchParams.delete("hmac");
+
+  /*
+   * The remaining parameters must also be sorted:
+   * https://shopify.dev/apps/auth/oauth/getting-started#remove-the-hmac-parameter-from-the-query-string
+   */
+  url.searchParams.sort();
   const urlParamsWithoutHMAC = url.searchParams.toString();
 
   const hmacCalculated = crypto
