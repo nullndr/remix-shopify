@@ -49,6 +49,7 @@ type AuthCallbackResult =
       success: true;
       shopifyDomain: string;
       accessToken: string;
+      host: string;
     }
   | {
       success: false;
@@ -70,7 +71,7 @@ export async function validateShopifyAuth({
   });
 
   if (validationResult.success) {
-    const { code, shopifyDomain } = validationResult;
+    const { code, shopifyDomain, host } = validationResult;
 
     const body = JSON.stringify({
       client_id: clientId,
@@ -96,6 +97,7 @@ export async function validateShopifyAuth({
         success: true,
         shopifyDomain,
         accessToken: payload.access_token,
+        host,
       };
     }
   }
@@ -115,6 +117,7 @@ type ValidateShopifyRequestResult =
       success: true;
       code: string;
       shopifyDomain: string;
+      host: string;
     }
   | {
       success: false;
@@ -155,6 +158,7 @@ const validateShopifyRequest = async ({
     success: true,
     code,
     shopifyDomain,
+    host,
   };
 };
 

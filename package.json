@@ -13,6 +13,7 @@
     "@remix-run/node": "*",
     "@remix-run/react": "*",
     "@remix-run/serve": "*",
+    "@shopify/app-bridge-react": "^3.7.2",
     "@shopify/polaris": "^10.16.1",
     "isbot": "^3.6.5",
     "react": "^18.2.0",
