@@ -1,5 +1,5 @@
 import type { LoaderArgs } from "@remix-run/node";
-import { initializeShopifyAuth } from "~/remix-shopify/index.server";
+import { initializeShopifyAuth } from "~/remixShopify.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);

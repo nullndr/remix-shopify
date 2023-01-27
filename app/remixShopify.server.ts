@@ -1,6 +1,6 @@
 import { redirect } from "@remix-run/node";
 import * as crypto from "crypto";
-import { shopifyState } from "./shopifyState.server";
+import { shopifyState } from "./sessions/shopifyState.server";
 
 type BeginShopifyAuthArgs = {
   shopifyDomain: string;
@@ -10,7 +10,7 @@ type BeginShopifyAuthArgs = {
 };
 
 /**
- * Initializate a OAuth request from Shopify.
+ * Initializate an OAuth request from Shopify.
  *
  * This function will throw a redirect to the authorization url so it never returns.
  */

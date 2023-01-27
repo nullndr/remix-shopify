@@ -1,5 +1,5 @@
 import { LoaderArgs } from "@remix-run/node";
-import { validateShopifyAuth } from "~/remix-shopify/index.server";
+import { validateShopifyAuth } from "~/remixShopify.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   await validateShopifyAuth({
