@@ -34,7 +34,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       };
     }
 
-    throw redirect(`/shopify?shop=${shop}&host=${host}`);
+    throw redirect(`/api/auth?shop=${shop}&host=${host}`);
   }
 
   throw new Error("Missing shop or host parameters");

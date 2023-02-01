@@ -17,6 +17,6 @@ export const loader = async ({ request }: LoaderArgs) => {
     shopifyDomain,
     clientId: "my_shopify_api_key",
     scopes: ["read_customers", "write_customers"],
-    redirectPath: `https://${host}/shopify/callback`,
+    redirectPath: `https://${host}/api/auth/callback`,
   });
 };
