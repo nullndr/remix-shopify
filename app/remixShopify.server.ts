@@ -24,7 +24,9 @@ export async function initializeShopifyAuth({
   const state = generateState();
   session.set("state", state);
 
-  const authorizeUrl = new URL(`${shopifyDomain}/admin/oauth/authorize`);
+  const authorizeUrl = new URL(
+    `https://${shopifyDomain}/admin/oauth/authorize`,
+  );
 
   authorizeUrl.searchParams.append("client_id", clientId);
   authorizeUrl.searchParams.append("scope", scopes.join(","));
@@ -87,7 +89,7 @@ export async function validateShopifyAuth({
           "Content-Type": "application/json",
         },
         body,
-      }
+      },
     );
 
     const payload = await response.json();

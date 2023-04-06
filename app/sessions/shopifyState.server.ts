@@ -8,6 +8,6 @@ export const shopifyState = createCookieSessionStorage({
     path: "/",
     httpOnly: true,
     sameSite: process.env.NODE_ENV === "development" ? false : "lax",
-    maxAge: 600, // 10 minutes
+    maxAge: 120, // 2 minutes
   },
 });

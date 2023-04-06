@@ -5,5 +5,5 @@ services:
     image: ngrok/ngrok:alpine
     env_file:
       - .env
-    command: http 3000 --authtoken ${NGROK_AUTH_TOKEN}
+    command: http 3000 --authtoken ${NGROK_AUTH_TOKEN} --subdomain ${NGROK_SUBDOMAIN}
     network_mode: host

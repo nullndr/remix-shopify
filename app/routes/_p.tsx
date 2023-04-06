@@ -23,7 +23,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   if (shop && host) {
     const session = await shopifyState.getSession(
-      request.headers.get("Cookie")
+      request.headers.get("Cookie"),
     );
     const shopifyDomain = session.get("shopifyDomain");
 

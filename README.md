@@ -26,18 +26,16 @@ The `NGROK_SUBDOMAIN` is your subdomain for the `ngrok.io` domain, for example i
 
 ## Development
 
-1. Replace the `scopes` value in [`app/routes/shopify/index`](./app/routes/shopify/index.ts) with the permissions your app needs.
+1. Write your `SHOPIFY_API_KEY` and your `SHOPIFY_API_SECRET` in the `.env` file (you can use the `.env.example` file as example).
 
-2. Replace the `clientId` value in [`app/routes/shopify/index`](./app/routes/shopify/index.ts) and in [`app/routes/shopify/callback`](./app/routes/shopify/callback.ts) with your App Client Id.
+2. Replace the `scopes` value in [`app/routes/api/auth`](./app/routes/api/auth_.ts) with the permissions your app needs.
 
-3. Replace the `appSecret` value in [`app/routes/shopify/callback`](./app/routes/shopify/callback.ts) with you App secret.
-
-4. Run the first build:
+3. Run the first build:
     ```sh
     npm run build
     ```
 
-5. Start dev server:
+4. Start dev server:
     ```
     npm run dev
     ```
