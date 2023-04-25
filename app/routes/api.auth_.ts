@@ -15,10 +15,12 @@ export const loader = async ({ request }: LoaderArgs) => {
     throw new Response(null, { status: 500 });
   }
 
+  const scopes = process.env.SHOPIFY_APP_PERMISSIONS?.split(",") ?? [];
+
   await initializeShopifyAuth({
     shopifyDomain,
     clientId,
-    scopes: ["read_customers", "write_customers"],
+    scopes,
     redirectPath: `https://${host}/api/auth/callback`,
   });
 };

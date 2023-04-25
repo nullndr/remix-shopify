@@ -4,7 +4,7 @@ All in one Remix.run template to get started with Shopify App's.
 
 Learn more about [Remix Stacks](https://remix.run/stacks).
 
-```
+```sh
 npx create-remix@latest --template nullndr/remix-shopify
 ```
 
@@ -24,11 +24,18 @@ For this you need to get an ngrok auth token and set it in your `.env` file (you
 
 The `NGROK_SUBDOMAIN` is your subdomain for the `ngrok.io` domain, for example if you set `NGROK_SUBDOMAIN=myfoobar` your app will be accessible at `myfoobar.ngrok.io`.
 
+This service starts also a web server at `localhost:4040` to monitor your ngrok service.
+
 ## Development
 
 1. Write your `SHOPIFY_API_KEY` and your `SHOPIFY_API_SECRET` in the `.env` file (you can use the `.env.example` file as example).
 
-2. Replace the `scopes` value in [`app/routes/api/auth`](./app/routes/api/auth_.ts) with the permissions your app needs.
+2. Replace the `SHOPIFY_APP_PERMISSIONS` value in the `.env` file with the permissions your app needs.
+
+> Remember to write them with the following format:
+> ```sh
+> SHOPIFY_APP_PERMISSIONS="read_customers,write_customers"
+> ```
 
 3. Run the first build:
     ```sh
@@ -36,17 +43,27 @@ The `NGROK_SUBDOMAIN` is your subdomain for the `ngrok.io` domain, for example i
     ```
 
 4. Start dev server:
-    ```
+    ```sh
     npm run dev
     ```
 
 ### Type Checking
 
-This project uses TypeScript. It's recommended to get TypeScript set up for your editor to get a really great in-editor experience with type checking and auto-complete. To run type checking across the whole project, run `npm run typecheck`.
+This project uses TypeScript. 
+
+It's recommended to get TypeScript set up for your editor to get a really great in-editor experience with type checking and auto-complete.
+
+To run type checking across the whole project, run the following:
+
+```sh
+npm run typecheck
+```
 
 ### Linting
 
-This project uses ESLint for linting. That is configured in `.eslintrc.js`.
+This project uses ESLint for linting. 
+
+You can find it's configurations in `.eslintrc.js`.
 
 ### Formatting
 
