@@ -1,7 +1,7 @@
-import { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
 import { redirect } from "react-router";
-import { validateShopifyAuth } from "~/remixShopify.server";
-import { shopifyState } from "~/sessions/shopifyState.server";
+import { callbackShopifyAuth } from "~/remixShopify.server";
+import { shopDomainSession } from "~/sessions/shopDomainSession.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const clientId = process.env.SHOPIFY_API_KEY;
@@ -11,24 +11,17 @@ export const loader = async ({ request }: LoaderArgs) => {
     throw new Response(null, { status: 500 });
   }
 
-  const data = await validateShopifyAuth({
+  const { accessToken, host, shopifyDomain } = await callbackShopifyAuth({
     request,
     clientId,
     appSecret,
   });
 
-  if (data.success) {
-    const { host, shopifyDomain } = data;
-    const session = await shopifyState.getSession();
-    session.set("shopifyDomain", shopifyDomain);
-    throw redirect(`/?shop=${shopifyDomain}&host=${host}`, {
-      headers: {
-        "Set-Cookie": await shopifyState.commitSession(session),
-      },
-    });
-  }
-
-  throw new Response(null, {
-    status: 401,
+  const session = await shopDomainSession.getSession();
+  session.set("shopifyDomain", shopifyDomain);
+  throw redirect(`/?shop=${shopifyDomain}&host=${host}`, {
+    headers: {
+      "Set-Cookie": await shopDomainSession.commitSession(session),
+    },
   });
 };

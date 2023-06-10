@@ -1,8 +1,12 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 
-export const shopifyState = createCookieSessionStorage({
+type SessionData = {
+  state: string;
+};
+
+export const stateSession = createCookieSessionStorage<SessionData>({
   cookie: {
-    name: "shopify state",
+    name: "shopify_app_state",
     secure: true,
     secrets: ["sup3r_se3cr3t"],
     path: "/",

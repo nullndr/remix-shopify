@@ -1,12 +1,12 @@
 import { redirect } from "@remix-run/node";
 import * as crypto from "crypto";
-import { shopifyState } from "./sessions/shopifyState.server";
+import { stateSession } from "./sessions/stateSession.server";
 
-type BeginShopifyAuthArgs = {
-  shopifyDomain: string;
-  scopes: string[];
-  redirectPath: string;
+type BeginArgs = {
   clientId: string;
+  scopes: string[];
+  callbackPath: string;
+  isOnline?: boolean;
 };
 
 /**
@@ -14,163 +14,111 @@ type BeginShopifyAuthArgs = {
  *
  * This function will throw a redirect to the authorization url so it never returns.
  */
-export async function initializeShopifyAuth({
-  shopifyDomain,
-  scopes,
-  clientId,
-  redirectPath,
-}: BeginShopifyAuthArgs): Promise<never> {
-  const session = await shopifyState.getSession();
-  const state = generateState();
+export async function beginShopifyAuth(
+  shop: string,
+  { scopes, clientId, callbackPath, isOnline = false }: BeginArgs,
+): Promise<never> {
+  const session = await stateSession.getSession();
+  const state = nonce();
   session.set("state", state);
 
-  const authorizeUrl = new URL(
-    `https://${shopifyDomain}/admin/oauth/authorize`,
+  const redirectUrl = new URL(`https://${shop}/admin/oauth/authorize`);
+
+  redirectUrl.searchParams.append("client_id", clientId);
+  redirectUrl.searchParams.append("scope", scopes.join(","));
+  redirectUrl.searchParams.append("redirect_uri", callbackPath);
+  redirectUrl.searchParams.append("state", state);
+  redirectUrl.searchParams.append(
+    "grant_options[]",
+    isOnline ? "per-user" : "",
   );
 
-  authorizeUrl.searchParams.append("client_id", clientId);
-  authorizeUrl.searchParams.append("scope", scopes.join(","));
-  authorizeUrl.searchParams.append("redirect_uri", redirectPath);
-  authorizeUrl.searchParams.append("state", state);
-
-  throw redirect(authorizeUrl.toString(), {
+  throw redirect(redirectUrl.toString(), {
     headers: {
-      "Set-Cookie": await shopifyState.commitSession(session),
+      "Set-Cookie": await stateSession.commitSession(session),
     },
   });
 }
 
-type ValidateAuthCallbackArgs = {
+type CallbackArgs = {
   request: Request;
   clientId: string;
   appSecret: string;
 };
 
-type AuthCallbackResult =
-  | {
-      success: true;
-      shopifyDomain: string;
-      accessToken: string;
-      host: string;
-    }
-  | {
-      success: false;
-    };
+type CallbackResult = {
+  shopifyDomain: string;
+  accessToken: string;
+  host: string;
+};
 
 /**
  * Validate the request from Shopify sent to `redirectPath` in `initializeShopifyAuth`.
  *
  * Returns the access token on success.
  */
-export async function validateShopifyAuth({
+export async function callbackShopifyAuth({
   request,
   clientId,
   appSecret,
-}: ValidateAuthCallbackArgs): Promise<AuthCallbackResult> {
-  const validationResult = await validateShopifyRequest({
-    request,
-    appSecret,
-  });
-
-  if (validationResult.success) {
-    const { code, shopifyDomain, host } = validationResult;
-
-    const body = JSON.stringify({
-      client_id: clientId,
-      client_secret: appSecret,
-      code,
-    });
-
-    const response = await fetch(
-      `https://${shopifyDomain}/admin/oauth/access_token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body,
-      },
-    );
-
-    const payload = await response.json();
-
-    if ("access_token" in payload && typeof payload.access_token === "string") {
-      return {
-        success: true,
-        shopifyDomain,
-        accessToken: payload.access_token,
-        host,
-      };
-    }
-  }
-
-  return {
-    success: false,
-  };
-}
-
-type ValidateRequestArgs = {
-  request: Request;
-  appSecret: string;
-};
-
-type ValidateShopifyRequestResult =
-  | {
-      success: true;
-      code: string;
-      shopifyDomain: string;
-      host: string;
-    }
-  | {
-      success: false;
-    };
-
-const validateShopifyRequest = async ({
-  request,
-  appSecret,
-}: ValidateRequestArgs): Promise<ValidateShopifyRequestResult> => {
+}: CallbackArgs): Promise<CallbackResult> {
   const url = new URL(request.url);
 
   const code = url.searchParams.get("code");
-  const shopifyDomain = url.searchParams.get("shop");
+  const shop = url.searchParams.get("shop");
   const host = url.searchParams.get("host");
 
-  if (!code || !shopifyDomain || !host) {
-    return {
-      success: false,
-    };
+  if (!code || !shop || !host) {
+    throw new Response(null, {
+      status: 400,
+    });
   }
 
   const stateFromUrl = url.searchParams.get("state");
 
-  const session = await shopifyState.getSession(request.headers.get("Cookie"));
+  const session = await stateSession.getSession(request.headers.get("Cookie"));
   const stateFromSession = session.get("state");
-  shopifyState.destroySession(session);
+  stateSession.destroySession(session);
 
-  const isVerifiedRequest = isHMACValid(request, appSecret);
+  const isVerifiedRequest = isValidHMAC(request, appSecret);
   const isValidState = stateFromSession === stateFromUrl;
 
   if (!isVerifiedRequest || !isValidState) {
-    return {
-      success: false,
-    };
+    throw new Response(null, {
+      status: 401,
+    });
   }
 
-  return {
-    success: true,
-    code,
-    shopifyDomain,
-    host,
-  };
+  const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: appSecret,
+      code,
+    }),
+  });
+
+  const payload = await response.json();
+
+  if ("access_token" in payload && typeof payload.access_token === "string") {
+    return { shopifyDomain: shop, accessToken: payload.access_token, host };
+  }
+
+  throw new Response(null, {
+    status: 401,
+  });
+}
+
+const nonce = () => {
+  const length = 15;
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return bytes.map((byte) => byte % 10).join("");
 };
 
-const generateState = () => {
-  return Math.random()
-    .toString(16)
-    .substring(2, Math.floor(Math.random() * (32 - 16) + 16));
-};
-
-const isHMACValid = (request: Request, secret: string): boolean => {
+const isValidHMAC = (request: Request, secret: string): boolean => {
   const url = new URL(request.url);
   const hmac = url.searchParams.get("hmac");
 

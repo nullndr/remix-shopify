@@ -1,4 +1,4 @@
-import { LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
 import {
   Outlet,
   useLoaderData,
@@ -9,7 +9,7 @@ import { Provider as ShopifyProvider } from "@shopify/app-bridge-react";
 import { AppProvider } from "@shopify/polaris";
 import en from "@shopify/polaris/locales/en.json";
 import { redirect } from "react-router";
-import { shopifyState } from "~/sessions/shopifyState.server";
+import { stateSession } from "~/sessions/stateSession.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
@@ -22,7 +22,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (shop && host) {
-    const session = await shopifyState.getSession(
+    const session = await stateSession.getSession(
       request.headers.get("Cookie"),
     );
     const shopifyDomain = session.get("shopifyDomain");

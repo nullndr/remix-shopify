@@ -1,26 +1,33 @@
 import type { LoaderArgs } from "@remix-run/node";
-import { initializeShopifyAuth } from "~/remixShopify.server";
+import { beginShopifyAuth } from "~/remixShopify.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
+  const hostName = request.headers.get("host");
+
   const url = new URL(request.url);
-  const shopifyDomain = url.searchParams.get("shop");
-  const host = request.headers.get("host");
+  const shop = url.searchParams.get("shop");
+  const host = url.searchParams.get("host");
+
+  if (shop == null || host == null) {
+    throw new Response(null, {
+      status: 400,
+    });
+  }
+
   const clientId = process.env.SHOPIFY_API_KEY;
 
-  if (shopifyDomain == null || host == null) {
-    throw new Response(null, { status: 400, statusText: "Invalid request" });
-  }
-
   if (clientId == null) {
-    throw new Response(null, { status: 500 });
+    throw new Error("Missing app client id");
   }
 
-  const scopes = process.env.SHOPIFY_APP_PERMISSIONS?.split(",") ?? [];
-
-  await initializeShopifyAuth({
-    shopifyDomain,
+  await beginShopifyAuth(shop, {
     clientId,
-    scopes,
-    redirectPath: `https://${host}/api/auth/callback`,
+    scopes: [
+      "read_customers",
+      "write_customers",
+      "read_orders",
+      "read_fulfillments",
+    ],
+    callbackPath: `https://${hostName}/auth/callback`,
   });
 };
