@@ -9,7 +9,7 @@ import { Provider as ShopifyProvider } from "@shopify/app-bridge-react";
 import { AppProvider } from "@shopify/polaris";
 import en from "@shopify/polaris/locales/en.json";
 import { redirect } from "react-router";
-import { stateSession } from "~/sessions/stateSession.server";
+import { shopDomainSession } from "~/sessions/shopDomainSession.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
@@ -22,12 +22,12 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 
   if (shop && host) {
-    const session = await stateSession.getSession(
+    const session = await shopDomainSession.getSession(
       request.headers.get("Cookie"),
     );
     const shopifyDomain = session.get("shopifyDomain");
 
-    if (shopifyDomain == shop) {
+    if (shopifyDomain === shop) {
       return {
         apiKey,
         host,
