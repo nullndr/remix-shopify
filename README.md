@@ -1,3 +1,11 @@
+# Depreacted
+
+⚠️ This project is deprecated.
+
+Shopify released the official remix stack for apps, you can find it [here](https://github.com/Shopify/shopify-app-template-remix).
+
+This project is now deprecated.
+
 # Remix Shopify App
 
 All in one Remix.run template to get started with Shopify App's.
